@@ -23,7 +23,7 @@ env:
   # Specify the student namespace for isolation within the Kubernetes cluster
   # Example: STUDENT_NAMESPACE: "pingdevops-namespace-a"
   STUDENT_NAMESPACE: ${{vars.STUDENT_NAMESPACE}}
-
+  COMMIT_HASH=$(git rev-parse --short HEAD)
 
 
 jobs:
@@ -47,10 +47,10 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{vars.AWS_REGION}}
 
-    # Set COMMIT_HASH as an environment variable
-    - name: Set COMMIT_HASH
-      id: set_commit_hash
-      run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+    # Set GITHUB_RELEASE_TAG as an environment variable
+    - name: Set GITHUB_RELEASE_TAG
+      id: set_release_tag
+      run: echo "GITHUB_RELEASE_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
     # Update kubeconfig to access the EKS cluster
     - name: Connect with EKS cluster
@@ -85,8 +85,8 @@ jobs:
 
         helm upgrade --install pingfederate-release pingidentity/ping-devops \
         --set global.envs.PING_IDENTITY_ACCEPT_EULA=YES \
-        --set pingfederate-engine.envs.COMMIT_HASH=$COMMIT_HASH \
-        --set pingfederate-admin.envs.COMMIT_HASH=$COMMIT_HASH \
+        --set pingfederate-engine.envs.COMMIT_HASH=$GITHUB_RELEASE_TAG \
+        --set pingfederate-admin.envs.COMMIT_HASH=$GITHUB_RELEASE_TAG \
         --set global.addReleaseNameToResource=none \
         --version 0.10.0 \
         --namespace=$STUDENT_NAMESPACE \
