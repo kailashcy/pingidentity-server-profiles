@@ -32,10 +32,7 @@ jobs:
 
     steps:
 
-    # Set environment variables, including the release tag used for versioning
-    - name: Set Release Tag variable
-      id: vars
-      run: echo "RELEASE_TAG=${GITHUB_REF#refs/*/}-${BASE_IMAGE_TAG}" >> $GITHUB_ENV
+
 
     # Check out the repository code
     - name: Check out code
@@ -49,23 +46,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{vars.AWS_REGION}}
 
-    # Log in to Amazon ECR for pushing Docker images
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    # Build the Docker image, tag it, and push it to Amazon ECR
-    - name: Build, tag, and push image to Amazon ECR
-      run: |
-        docker build \
-        --build-arg BASE_IMAGE_REPOSITORY=$BASE_IMAGE_REPOSITORY \
-        --build-arg PRODUCT=$PRODUCT \
-        --build-arg BASE_IMAGE_TAG=$BASE_IMAGE_TAG \
-        -t $ECR_REGISTRY/$ECR_REPOSITORY:$RELEASE_TAG \
-        -f baseline/pingfederate/Dockerfile baseline/pingfederate/ 
-        echo "Image build completed" \ 
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$RELEASE_TAG 
-        echo "Image push completed"
+ 
 
     # Update kubeconfig to access the EKS cluster
     - name: Connect with EKS cluster
@@ -100,10 +81,6 @@ jobs:
 
         helm upgrade --install pingfederate-release pingidentity/ping-devops \
         --set global.envs.PING_IDENTITY_ACCEPT_EULA=YES \
-        --set pingfederate-admin.image.tag=$RELEASE_TAG \
-        --set pingfederate-engine.image.tag=$RELEASE_TAG \
-        --set pingfederate-admin.image.repositoryFqn=$ECR_REGISTRY/$ECR_REPOSITORY \
-        --set pingfederate-engine.image.repositoryFqn=$ECR_REGISTRY/$ECR_REPOSITORY \
         --set pingfederate-engine.envs.DEPLOYED_TIMESTAMP=$(date +%s) \
         --set pingfederate-admin.envs.DEPLOYED_TIMESTAMP=$(date +%s) \
         --set global.addReleaseNameToResource=none \
