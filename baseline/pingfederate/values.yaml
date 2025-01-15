@@ -1013,10 +1013,7 @@ pingfederate-engine:
         timeoutSeconds: 300
 
   envs:
-    PF_ADMIN_PORT: "9999"
-
-
-  envs:
+   PF_ADMIN_PORT: "9999"
    SERVER_PROFILE_PATH: baseline/pingfederate
    SERVER_PROFILE_URL: https://github.com/saadousman/pingidentity-server-profiles
 
@@ -1875,5 +1872,4 @@ testFramework:
       runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
-
 
