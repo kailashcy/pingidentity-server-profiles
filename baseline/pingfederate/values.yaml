@@ -905,7 +905,7 @@ pingfederate-admin:
   name: pingfederate-admin
   image:
     name: pingfederate
-
+    
   container:
     resources:
       requests:
@@ -998,7 +998,7 @@ pingfederate-engine:
   name: pingfederate-engine
   image:
     name: pingfederate
-
+    tag:2411
   container:
     resources:
       requests:
